@@ -17,12 +17,12 @@ A Windows app with a simple UI and a real installer, using about half the usual 
 
 ## Features
 
-- **Your voice.** Clone a voice from a 5–20 s recording, from a file or your microphone. The app picks a clean fragment and transcribes it automatically with Whisper.
+- **Your voice.** Clone a voice from a 5–20 s recording, from your microphone or any audio or video file (WAV, MP3, FLAC, M4A, WMA, AMR, MP4, MKV, MOV and more). The file is converted automatically, the app picks a clean fragment and transcribes it with Whisper.
 - **Voice library.** Add a voice once and pick it from a list afterwards. Voices can be exported to a file and shared.
 - **Built-in voices.** 9 Qwen3-TTS speakers. Describe the delivery in words: "happily", "whisper", "like a news anchor".
-- **Voice design.** Create a voice from a text description ("a deep, raspy male voice, speaks slowly"). Save the ones you like to the library.
+- **Voice design.** Create a voice from a text description ("a deep, raspy male voice, speaks slowly"). The "Design a voice" wizard in the library generates several variants of a sample phrase; the one you pick is saved as a regular cloning voice that also works with the fast 0.6B model.
 - **Pick a model:** 0.6B (fast, ~2 GB of VRAM is enough) or 1.7B (better quality). Download only the ones you need, and load or unload them from VRAM with a button. The sidebar shows what's in memory and what's downloading.
-- **Streaming playback.** Audio starts in about 0.4 s. Long texts are split and voiced in parts, with no length limit.
+- **Streaming playback.** Audio starts in about 0.4 s. Long texts are voiced in parts of up to ~500 characters, split only at sentence ends and balanced in length, so intonation stays even. There is no length limit.
 - **Export to WAV and MP3**, plus a history of every generation that can be replayed with the same settings.
 - **Developer mode:** every generation and lowvram parameter, presets, a live VRAM chart, engine logs and a local HTTP API.
 - **Offline.** After the first setup everything runs locally, with no internet needed.
@@ -52,7 +52,7 @@ A Windows app with a simple UI and a real installer, using about half the usual 
    Windows may warn about an "unknown publisher" because the installer isn't code-signed. Click "More info" → "Run anyway".
 3. On first launch a setup wizard checks your GPU and downloads the components (~3 GB) and the Whisper speech recognition model (1.6 GB). Text-to-speech models are downloaded later, from the Models page or right on the main screen.
 
-When a new version is out, the sidebar shows a notice with an Install button. Nothing is downloaded or installed until you click it. The app then updates and restarts on its own, without re-downloading components or models. Checking for updates on startup can be turned off in Settings.
+When a new version is out, the sidebar shows a notice with an Install button. Nothing is downloaded or installed until you click it. The app then updates and restarts on its own, without re-downloading components or models, and shows what's new in the installed version. Checking for updates on startup can be turned off in Settings.
 
 <img src="docs/screenshots/setup.png" width="640" alt="First-run setup" />
 

@@ -14,12 +14,12 @@ export const DEFAULT_PARAMS: GenParams = {
   xvec_only: false,
   seed: null,
   split: true,
-  split_chars: 220,
+  split_chars: 500,
   decode_context: 25,
   vram_cap_gb: null
 }
 
-export const DEFAULT_LOAD: LoadOptions = { max_seq_len: 1024, offload_embedding: true, repack: true, attn: 'sdpa' }
+export const DEFAULT_LOAD: LoadOptions = { max_seq_len: 2048, offload_embedding: true, repack: true, attn: 'sdpa' }
 
 export const defaultSettings = (): Settings => ({
   dataDir: null,
@@ -50,5 +50,7 @@ export const defaultSettings = (): Settings => ({
     language: 'Auto'
   },
   autoUpdate: true,
-  hfEndpoint: 'https://huggingface.co'
+  hfEndpoint: 'https://huggingface.co',
+  settingsVersion: 2,
+  lastSeenVersion: null
 })

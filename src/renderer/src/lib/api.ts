@@ -113,6 +113,24 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
   return data as T
 }
 
+export async function convertAudio(file: File): Promise<{ data: ArrayBuffer; truncated: boolean }> {
+  const f = new FormData()
+  let path = ''
+  try {
+    path = window.qts.pathForFile(file)
+  } catch {
+    path = ''
+  }
+  if (path) f.append('path', path)
+  else f.append('file', file, file.name)
+  const res = await fetch(base + '/audio/convert', { method: 'POST', headers: { 'x-token': token }, body: f })
+  if (!res.ok) {
+    const detail = await res.json().catch(() => null)
+    throw new ApiError(typeof detail?.detail === 'string' ? detail.detail : `HTTP ${res.status}`, res.status)
+  }
+  return { data: await res.arrayBuffer(), truncated: res.headers.get('x-truncated') === '1' }
+}
+
 export const fileUrl = (path: string): string => `${base}${path}${path.includes('?') ? '&' : '?'}token=${token}`
 
 export const api = {

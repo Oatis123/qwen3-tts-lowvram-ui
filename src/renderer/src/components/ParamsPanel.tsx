@@ -127,7 +127,7 @@ export function ParamsPanel({ size }: { size: Size }) {
         </Field>
         {p.split && (
           <Field label="split_chars" hint="Максимум символов в одном куске">
-            <NumberInput value={p.split_chars} min={40} max={1000} onChange={(v) => set({ split_chars: v ?? 220 })} />
+            <NumberInput value={p.split_chars} min={40} max={1500} onChange={(v) => set({ split_chars: v ?? 500 })} />
           </Field>
         )}
       </Group>

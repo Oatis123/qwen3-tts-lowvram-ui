@@ -1,5 +1,6 @@
 import { existsSync, readFileSync, writeFileSync, mkdirSync, renameSync } from 'node:fs'
 import { join } from 'node:path'
+import { app } from 'electron'
 import type { Settings } from '../shared/types'
 import { defaultSettings } from '../shared/defaults'
 import { home } from './paths'
@@ -29,6 +30,18 @@ export function getSettings(): Settings {
     stored = {}
   }
   cache = merge(defaults(), stored)
+  if (!existsSync(file())) {
+    cache.lastSeenVersion = app.getVersion()
+    mkdirSync(home(), { recursive: true })
+    writeFileSync(file(), JSON.stringify(cache, null, 2))
+  }
+  const version = (stored as { settingsVersion?: number }).settingsVersion ?? 1
+  if (version < 2 && existsSync(file())) {
+    if (cache.params.split_chars === 220) cache.params.split_chars = 500
+    if (cache.load.max_seq_len === 1024) cache.load.max_seq_len = 2048
+    cache.settingsVersion = 2
+    writeFileSync(file(), JSON.stringify(cache, null, 2))
+  }
   return cache
 }
 
@@ -42,9 +55,9 @@ export function setSettings(patch: Partial<Settings>): Settings {
 }
 
 export function resetSettings(): Settings {
-  const keep = getSettings().dataDir
+  const { dataDir, lastSeenVersion, settingsVersion } = getSettings()
   cache = null
-  writeFileSync(file(), JSON.stringify({ dataDir: keep }, null, 2))
+  writeFileSync(file(), JSON.stringify({ dataDir, lastSeenVersion, settingsVersion }, null, 2))
   return getSettings()
 }
 

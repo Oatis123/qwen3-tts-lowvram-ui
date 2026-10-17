@@ -166,7 +166,7 @@ export default function Dev() {
           {status?.error && <div className="mt-2 text-xs text-bad">{status.error}</div>}
           <div className="mt-3 text-[11px] font-semibold uppercase tracking-wider text-faint">{t.dev.loadOptions}</div>
           <Row label="max_seq_len" hint="Размер статического KV-кеша">
-            <NumberInput value={load.max_seq_len} min={256} max={8192} step={128} onChange={(v) => setLoad({ max_seq_len: v ?? 1024 })} />
+            <NumberInput value={load.max_seq_len} min={256} max={8192} step={128} onChange={(v) => setLoad({ max_seq_len: v ?? 2048 })} />
           </Row>
           <Row label="offload_text_embedding" hint="−594 MiB: текстовый эмбеддинг в RAM">
             <Toggle checked={load.offload_embedding} onChange={(v) => setLoad({ offload_embedding: v })} />

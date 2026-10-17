@@ -351,3 +351,15 @@ export function Section({ title, children, hint }: { title: string; children: Re
     </Card>
   )
 }
+
+export function Chips({ items, onPick }: { items: [string, string][]; onPick: (value: string) => void }) {
+  return (
+    <div className="mt-2 flex flex-wrap gap-1.5">
+      {items.map(([label, value]) => (
+        <button key={label} onClick={() => onPick(value)} className="rounded-full border border-line bg-panel-2 px-3 py-1 text-xs text-muted hover:border-accent hover:text-fg cursor-pointer">
+          {label}
+        </button>
+      ))}
+    </div>
+  )
+}

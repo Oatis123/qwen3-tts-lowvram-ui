@@ -2,27 +2,16 @@ import { Dices, Download, FileAudio, Lock, Mic2, Shuffle, Sparkles, Square, User
 import { useEffect, useState } from 'react'
 import type { Mode, Size } from '../../../shared/types'
 import { AddVoiceWizard } from '../components/AddVoiceWizard'
+import { MissingModel } from '../components/MissingModel'
 import { ModelBar } from '../components/ModelBar'
 import { ParamsPanel } from '../components/ParamsPanel'
 import { PlayerView } from '../components/PlayerView'
-import { Badge, Button, Card, cx, IconButton, Input, Label, Modal, Progress, Segmented, Select, Slider, Spinner, Textarea } from '../components/ui'
+import { Badge, Button, Card, Chips, cx, IconButton, Input, Label, Modal, Segmented, Select, Slider, Spinner, Textarea } from '../components/ui'
 import { VoiceSelect } from '../components/VoiceSelect'
 import { fmt, t } from '../i18n'
 import { api } from '../lib/api'
-import { bytes, estimateSeconds } from '../lib/format'
+import { estimateSeconds } from '../lib/format'
 import { modelKey, player, useApp, useGen } from '../store'
-
-function Chips({ items, onPick }: { items: [string, string][]; onPick: (value: string) => void }) {
-  return (
-    <div className="mt-2 flex flex-wrap gap-1.5">
-      {items.map(([label, value]) => (
-        <button key={label} onClick={() => onPick(value)} className="rounded-full border border-line bg-panel-2 px-3 py-1 text-xs text-muted hover:border-accent hover:text-fg cursor-pointer">
-          {label}
-        </button>
-      ))}
-    </div>
-  )
-}
 
 function SpeakerGrid() {
   const speakers = useApp((s) => s.catalog.speakers)
@@ -47,37 +36,6 @@ function SpeakerGrid() {
         </button>
       ))}
     </div>
-  )
-}
-
-function MissingModel({ modelId }: { modelId: string }) {
-  const models = useApp((s) => s.models)
-  const downloadModel = useApp((s) => s.downloadModel)
-  const m = models.find((x) => x.key === modelId)
-  if (!m) return null
-  return (
-    <Card className="flex items-center gap-4 border-warn/40 p-4">
-      <Download size={20} className="shrink-0 text-warn" />
-      <div className="min-w-0 flex-1">
-        <div className="text-[14px] font-medium">{t.generate.missingModel}</div>
-        <div className="text-xs text-faint">
-          {m.repo} · {bytes(m.bytes)}
-        </div>
-        {m.downloading && (
-          <div className="mt-2">
-            <Progress value={(m.received ?? 0) / Math.max(1, m.total ?? m.bytes)} />
-            <div className="mt-1 font-mono text-[11px] text-faint">
-              {bytes(m.received)} / {bytes(m.total || m.bytes)} · {bytes(m.speed)}/с
-            </div>
-          </div>
-        )}
-      </div>
-      {!m.downloading && !m.downloaded && (
-        <Button variant="primary" onClick={() => void downloadModel(modelId)}>
-          {t.generate.missingDownload}
-        </Button>
-      )}
-    </Card>
   )
 }
 

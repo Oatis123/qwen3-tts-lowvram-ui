@@ -194,6 +194,40 @@ export const ru = {
     exported: 'Голос сохранён в файл',
     consent: 'Клонируйте только те голоса, на которые у вас есть права и согласие владельца.'
   },
+  designWizard: {
+    button: 'Придумать голос',
+    title: 'Придумать новый голос',
+    intro: 'Опишите голос словами — модель сгенерирует несколько вариантов. Выберите понравившийся, и он появится в библиотеке как обычный голос для клонирования: его можно использовать с быстрой моделью 0.6B.',
+    language: 'Язык голоса',
+    phrase: 'Фраза для образца',
+    phraseHint: 'Голос произнесёт её, и запись станет образцом. Лучше 1–3 предложения, примерно 10–15 секунд речи.',
+    vramNote: 'Придумывает голоса модель 1.7B, ей нужно около 5 ГБ видеопамяти. Если в памяти другая модель, она будет заменена.',
+    create: 'Создать варианты',
+    pickHint: 'Прослушайте варианты и выберите тот, что нравится больше всего.',
+    variant: 'Вариант {n}',
+    waiting: 'В очереди',
+    loadingModel: 'Загружаю модель…',
+    generating: 'Генерирую…',
+    failed: 'Не получилось',
+    tooShort: 'слишком коротко',
+    tooLong: 'слишком длинно, сократите фразу',
+    more: 'Ещё варианты',
+    edit: 'Изменить описание',
+    save: 'Сохранить в библиотеку',
+    defaultName: 'Новый голос',
+    samples: {
+      Russian: 'Привет! Сегодня я расскажу вам одну интересную историю. Всё началось тёплым летним вечером, когда за окном шёл тихий дождь, а в доме пахло свежим чаем.',
+      English: "Hello! Today I'd like to tell you a little story. It all started on a warm summer evening, when soft rain was falling outside and the house smelled of fresh tea.",
+      Chinese: '你好！今天我想给你讲一个小故事。那是一个温暖的夏日傍晚，窗外下着小雨，屋子里飘着新茶的香味。',
+      Japanese: 'こんにちは。今日は小さなお話をしたいと思います。それは暖かい夏の夕方のことでした。外では静かに雨が降り、家の中にはお茶の香りが漂っていました。',
+      Korean: '안녕하세요! 오늘은 작은 이야기를 하나 들려드릴게요. 따뜻한 여름 저녁이었고, 창밖에는 조용히 비가 내리고 집 안에는 차 향기가 가득했어요.',
+      German: 'Hallo! Heute möchte ich Ihnen eine kleine Geschichte erzählen. Alles begann an einem warmen Sommerabend, als draußen leiser Regen fiel und es im Haus nach frischem Tee duftete.',
+      French: "Bonjour ! Aujourd'hui, j'aimerais vous raconter une petite histoire. Tout a commencé par une chaude soirée d'été, quand une pluie douce tombait dehors et que la maison sentait le thé frais.",
+      Spanish: '¡Hola! Hoy quiero contarte una pequeña historia. Todo empezó una cálida tarde de verano, cuando caía una lluvia suave y la casa olía a té recién hecho.',
+      Italian: "Ciao! Oggi vorrei raccontarti una piccola storia. Tutto è iniziato in una calda sera d'estate, mentre fuori cadeva una pioggia leggera e la casa profumava di tè appena fatto.",
+      Portuguese: 'Olá! Hoje quero contar uma pequena história. Tudo começou numa noite quente de verão, quando uma chuva leve caía lá fora e a casa cheirava a chá fresco.'
+    } as Record<string, string>
+  },
   wizard: {
     title: 'Новый голос',
     steps: ['Запись', 'Фрагмент', 'Текст и название'],
@@ -208,8 +242,9 @@ export const ru = {
       'Без музыки, эха и фонового шума',
       'Говорите естественно, как обычно'
     ],
-    formats: 'WAV, MP3, FLAC, OGG, M4A',
-    decodeError: 'Не удалось прочитать файл. Попробуйте другой формат.',
+    formats: 'Любой аудиофайл или видео — программа сама переведёт его в нужный формат',
+    truncated: 'Файл длинный, поэтому взяты первые 10 минут. Выберите в них фрагмент с чистой речью.',
+    decodeError: 'Не удалось прочитать звук из этого файла.',
     micError: 'Нет доступа к микрофону',
     regionTitle: 'Выберите фрагмент',
     regionHint: 'Перетащите края выделения. Лучше всего 5–20 секунд.',
@@ -374,6 +409,12 @@ export const ru = {
       on: 'вкл',
       off: 'выкл'
     }
+  },
+  whatsNew: {
+    title: 'Что нового',
+    updated: 'Приложение обновлено до версии {v}',
+    version: 'Версия {v}',
+    ok: 'Понятно'
   },
   errors: {
     backendDown: 'Движок озвучки не запущен',

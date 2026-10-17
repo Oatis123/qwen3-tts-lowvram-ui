@@ -1,6 +1,7 @@
-import { FileDown, FileUp, Library, MoreHorizontal, Pencil, Plus, Sparkles, Trash2 } from 'lucide-react'
+import { FileDown, FileUp, Library, MoreHorizontal, Pencil, Plus, Sparkles, Trash2, Wand2 } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { AddVoiceWizard } from '../components/AddVoiceWizard'
+import { DesignVoiceWizard } from '../components/DesignVoiceWizard'
 import { Button, Card, Empty, IconButton, Input, Label, Modal, PageHeader, Select, Textarea } from '../components/ui'
 import { PreviewButton } from '../components/VoiceSelect'
 import { fmt, t } from '../i18n'
@@ -134,6 +135,7 @@ export default function Voices() {
   const refreshVoices = useApp((s) => s.refreshVoices)
   const toast = useApp((s) => s.toast)
   const [wizard, setWizard] = useState(false)
+  const [designer, setDesigner] = useState(false)
   const [editing, setEditing] = useState<Voice | null>(null)
 
   const importVoice = async (): Promise<void> => {
@@ -163,6 +165,9 @@ export default function Voices() {
             <Button icon={<FileUp size={16} />} onClick={() => void importVoice()}>
               {t.voices.import}
             </Button>
+            <Button icon={<Wand2 size={16} />} onClick={() => setDesigner(true)}>
+              {t.designWizard.button}
+            </Button>
             <Button variant="primary" icon={<Plus size={16} />} onClick={() => setWizard(true)}>
               {t.voices.add}
             </Button>
@@ -176,9 +181,14 @@ export default function Voices() {
             title={t.voices.empty}
             text={t.voices.emptyHint}
             action={
-              <Button variant="primary" icon={<Plus size={16} />} onClick={() => setWizard(true)}>
-                {t.voices.add}
-              </Button>
+              <div className="flex gap-2">
+                <Button icon={<Wand2 size={16} />} onClick={() => setDesigner(true)}>
+                  {t.designWizard.button}
+                </Button>
+                <Button variant="primary" icon={<Plus size={16} />} onClick={() => setWizard(true)}>
+                  {t.voices.add}
+                </Button>
+              </div>
             }
           />
         </Card>
@@ -208,6 +218,7 @@ export default function Voices() {
       )}
       <div className="mt-6 text-xs text-faint">{t.voices.consent}</div>
       <AddVoiceWizard open={wizard} onClose={() => setWizard(false)} />
+      <DesignVoiceWizard open={designer} onClose={() => setDesigner(false)} />
       <EditModal voice={editing} onClose={() => setEditing(null)} />
     </div>
   )

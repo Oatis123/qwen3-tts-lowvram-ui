@@ -93,6 +93,8 @@ export interface Settings {
   api: ApiSettings
   autoUpdate: boolean
   hfEndpoint: string
+  settingsVersion: number
+  lastSeenVersion: string | null
 }
 
 export interface GpuInfo {

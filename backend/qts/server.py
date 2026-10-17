@@ -9,7 +9,7 @@ from pathlib import Path
 import numpy as np
 from fastapi import FastAPI, File, Form, HTTPException, Request as HttpRequest, UploadFile, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, Response
 from pydantic import BaseModel
 
 from . import audio
@@ -95,7 +95,7 @@ def create_app(data_dir: Path, models_dir: Path, catalog: dict, token: str, on_r
             return JSONResponse({"detail": "unauthorized"}, status_code=401)
         return await call_next(request)
 
-    app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
+    app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"], expose_headers=["x-truncated"])
 
     @app.exception_handler(NotFound)
     async def not_found(_r, e):
@@ -167,6 +167,23 @@ def create_app(data_dir: Path, models_dir: Path, catalog: dict, token: str, on_r
         except Exception as e:
             raise HTTPException(500, _humanize(e))
 
+    @app.post("/audio/convert")
+    async def audio_convert(file: UploadFile | None = File(None), path: str = Form("")):
+        if path:
+            source: bytes | str = path
+        elif file is not None:
+            source = await file.read()
+        else:
+            raise HTTPException(400, "no audio")
+        try:
+            x, sr, truncated = await asyncio.to_thread(audio.decode_any, source)
+        except audio.DecodeError as e:
+            raise HTTPException(400, str(e))
+        except Exception:
+            log.exception("audio convert failed")
+            raise HTTPException(400, "Не удалось прочитать звук из этого файла: он повреждён или это не аудио/видео")
+        return Response(audio.wav_bytes(x, sr), media_type="audio/wav", headers={"x-truncated": "1" if truncated else "0"})
+
     @app.get("/voices")
     def voices_list():
         return voices.list()
@@ -180,6 +197,8 @@ def create_app(data_dir: Path, models_dir: Path, catalog: dict, token: str, on_r
         source: str = Form("file"),
     ):
         x, sr = audio.read(await file.read())
+        if source == "design":
+            x = audio.trim_silence(x, sr)
         if len(x) < sr * 1.5:
             raise HTTPException(400, "Запись слишком короткая, нужно хотя бы 3 секунды")
         if not text.strip():

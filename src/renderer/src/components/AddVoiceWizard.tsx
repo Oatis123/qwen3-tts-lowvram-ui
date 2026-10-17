@@ -1,7 +1,7 @@
 import { Check, Download, FileAudio, Mic, Pause, Play, Sparkles, Square, Upload } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import { fmt, t } from '../i18n'
-import { api, type Voice } from '../lib/api'
+import { api, ApiError, convertAudio, type Voice } from '../lib/api'
 import { decodeToMono, encodeWav, formatTime, sliceSec, SR, suggestRegion } from '../lib/audio'
 import { bytes } from '../lib/format'
 import { clipPlayer } from '../lib/player'
@@ -48,6 +48,7 @@ export function AddVoiceWizard({ open, onClose, onCreated }: { open: boolean; on
   const [busy, setBusy] = useState(false)
   const [transcribing, setTranscribing] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [notice, setNotice] = useState<string | null>(null)
   const [dragOver, setDragOver] = useState(false)
   const [recording, setRecording] = useState(false)
   const [recTime, setRecTime] = useState(0)
@@ -99,12 +100,29 @@ export function AddVoiceWizard({ open, onClose, onCreated }: { open: boolean; on
   const loadFile = async (file: File): Promise<void> => {
     setBusy(true)
     setError(null)
+    setNotice(null)
     try {
-      const s = await decodeToMono(await file.arrayBuffer())
+      let s: Float32Array | null = null
+      const simple = file.size < 100 * 2 ** 20 && /\.(wav|mp3|flac|ogg|oga|opus|m4a|aac|webm)$/i.test(file.name)
+      if (simple) {
+        try {
+          s = await decodeToMono(await file.arrayBuffer())
+        } catch {
+          s = null
+        }
+      }
+      if (!s) {
+        const converted = await convertAudio(file)
+        s = await decodeToMono(converted.data)
+        if (converted.truncated) setNotice(t.wizard.truncated)
+      } else if (s.length > 600 * SR) {
+        s = s.slice(0, 600 * SR)
+        setNotice(t.wizard.truncated)
+      }
       accept(s, 'file', file.name)
       if (!name) setName(file.name.replace(/\.[^.]+$/, ''))
-    } catch {
-      setError(t.wizard.decodeError)
+    } catch (e) {
+      setError(e instanceof ApiError ? e.message : t.wizard.decodeError)
     } finally {
       setBusy(false)
     }
@@ -267,7 +285,7 @@ export function AddVoiceWizard({ open, onClose, onCreated }: { open: boolean; on
             <input
               ref={fileInput}
               type="file"
-              accept="audio/*,.wav,.mp3,.flac,.ogg,.m4a,.webm"
+              accept="audio/*,video/*,.wma,.amr,.aif,.aiff,.mka,.mkv,.avi,.mov,.3gp,.ac3,.dts,.caf"
               className="hidden"
               onChange={(e) => {
                 const f = e.target.files?.[0]
@@ -289,6 +307,7 @@ export function AddVoiceWizard({ open, onClose, onCreated }: { open: boolean; on
 
       {step === 1 && samples && (
         <div>
+          {notice && <div className="mb-3 rounded-lg bg-warn/10 border border-warn/30 p-3 text-[13px] text-warn">{notice}</div>}
           <Label hint={t.wizard.regionHint}>{t.wizard.regionTitle}</Label>
           <div className="rounded-xl bg-panel-2 border border-line p-3">
             <RegionWave samples={samples} region={region} onChange={setRegion} />

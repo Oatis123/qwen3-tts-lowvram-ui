@@ -2,6 +2,7 @@ import { Activity, AlertTriangle, AudioLines, Boxes, Clock, Library, RotateCw, S
 import { useEffect, type ReactNode } from 'react'
 import { SidebarStatus } from './components/SidebarStatus'
 import { Button, cx, Spinner } from './components/ui'
+import { WhatsNew } from './components/WhatsNew'
 import { t } from './i18n'
 import { api } from './lib/api'
 import Dev from './pages/Dev'
@@ -154,6 +155,7 @@ export default function App() {
           </main>
         </div>
       )}
+      {!needsSetup && <WhatsNew />}
       <Toasts />
     </div>
   )

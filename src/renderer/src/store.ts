@@ -42,6 +42,7 @@ interface AppState {
   page: Page
   toasts: Toast[]
   historyVersion: number
+  whatsNew: 'auto' | 'all' | null
   boot(): Promise<void>
   finishSetup(): Promise<void>
   patch(p: Partial<Settings>): Promise<void>
@@ -79,6 +80,7 @@ export const useApp = create<AppState>((set, get) => ({
   page: 'generate',
   toasts: [],
   historyVersion: 0,
+  whatsNew: null,
 
   async boot() {
     const q = window.qts
@@ -92,7 +94,7 @@ export const useApp = create<AppState>((set, get) => ({
       q.updater.state()
     ])
     const whisperReady = !!models.find((m) => m.key === `whisper-${settings.whisperModel}`)?.downloaded
-    set({ settings, catalog, info, runtime, models, backend, updater, needsSetup: !runtime.upToDate || !whisperReady, booted: true })
+    set({ settings, catalog, info, runtime, models, backend, updater, needsSetup: !runtime.upToDate || !whisperReady, whatsNew: settings.lastSeenVersion !== info.version ? 'auto' : null, booted: true })
 
     q.backend.onState((b) => {
       set({ backend: b })

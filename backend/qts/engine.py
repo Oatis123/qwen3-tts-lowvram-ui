@@ -27,7 +27,7 @@ class Busy(Exception):
 
 @dataclass(frozen=True)
 class LoadOptions:
-    max_seq_len: int = 1024
+    max_seq_len: int = 2048
     offload_embedding: bool = True
     repack: bool = True
     attn: str = "sdpa"
@@ -48,7 +48,7 @@ class Params:
     xvec_only: bool = False
     seed: int | None = None
     split: bool = True
-    split_chars: int = 220
+    split_chars: int = 500
     decode_context: int = 25
     vram_cap_gb: float | None = None
 

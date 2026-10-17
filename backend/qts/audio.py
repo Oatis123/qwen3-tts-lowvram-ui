@@ -66,3 +66,36 @@ def trim_silence(x: np.ndarray, sr: int, threshold_db: float = -45.0, pad: float
 def normalize(x: np.ndarray, peak: float = 0.95) -> np.ndarray:
     m = float(np.max(np.abs(x))) if len(x) else 0.0
     return x * (peak / m) if m > 1e-6 else x
+
+
+class DecodeError(Exception):
+    pass
+
+
+def decode_any(source: bytes | str | Path, target_sr: int = SR, max_seconds: float = 600.0) -> tuple[np.ndarray, int, bool]:
+    import av
+
+    limit = int(max_seconds * target_sr)
+    parts: list[np.ndarray] = []
+    total = 0
+    truncated = False
+    with av.open(io.BytesIO(source) if isinstance(source, bytes) else str(source)) as container:
+        stream = next((st for st in container.streams if st.type == "audio"), None)
+        if stream is None:
+            raise DecodeError("В файле нет звуковой дорожки")
+        resampler = av.AudioResampler(format="flt", layout="mono", rate=target_sr)
+        for frame in container.decode(stream):
+            for out in resampler.resample(frame):
+                a = out.to_ndarray().reshape(-1).astype(np.float32, copy=False)
+                parts.append(a)
+                total += len(a)
+            if total >= limit:
+                truncated = True
+                break
+        else:
+            for out in resampler.resample(None):
+                parts.append(out.to_ndarray().reshape(-1).astype(np.float32, copy=False))
+    if not parts:
+        raise DecodeError("Не удалось прочитать звук из файла")
+    x = np.concatenate(parts)[:limit]
+    return x, target_sr, truncated

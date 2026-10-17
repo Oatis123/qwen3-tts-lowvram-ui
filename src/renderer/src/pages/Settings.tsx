@@ -1,4 +1,4 @@
-import { ExternalLink, FolderOpen, RefreshCw } from 'lucide-react'
+import { ExternalLink, FolderOpen, RefreshCw, Sparkles } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Badge, Button, Input, NumberInput, PageHeader, Row, Section, Select, Toggle } from '../components/ui'
 import { fmt, t } from '../i18n'
@@ -163,7 +163,12 @@ export default function SettingsPage() {
 
       <Section title={t.settings.about}>
         <Row label={t.settings.version}>
-          <span className="font-mono text-[13px] text-muted">{info?.version}</span>
+          <div className="flex items-center gap-3">
+            <span className="font-mono text-[13px] text-muted">{info?.version}</span>
+            <Button size="sm" variant="ghost" icon={<Sparkles size={14} />} onClick={() => useApp.setState({ whatsNew: 'all' })}>
+              {t.whatsNew.title}
+            </Button>
+          </div>
         </Row>
         <div className="flex flex-wrap gap-2 pt-3">
           <Button size="sm" variant="ghost" icon={<ExternalLink size={14} />} onClick={() => void window.qts.shell.openExternal('https://github.com/Oatis123/qwen3-tts-lowvram')}>
