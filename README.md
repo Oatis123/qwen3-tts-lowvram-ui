@@ -52,7 +52,7 @@ A Windows app with a simple UI and a real installer, using about half the usual 
    Windows may warn about an "unknown publisher" because the installer isn't code-signed. Click "More info" → "Run anyway".
 3. On first launch a setup wizard checks your GPU and downloads the components (~3 GB) and the Whisper speech recognition model (1.6 GB). Text-to-speech models are downloaded later, from the Models page or right on the main screen.
 
-The app updates itself. Updates don't re-download components or models.
+When a new version is out, the sidebar shows a notice with an Install button. Nothing is downloaded or installed until you click it. The app then updates and restarts on its own, without re-downloading components or models. Checking for updates on startup can be turned off in Settings.
 
 <img src="docs/screenshots/setup.png" width="640" alt="First-run setup" />
 
@@ -131,7 +131,7 @@ resources/bin/uv.exe pip compile backend/requirements.in -o backend/requirements
 npm run dist
 ```
 
-This produces `dist/QwenTTSStudio-Setup-<version>.exe`. For a release, bump `version` in `package.json` and upload three files to a GitHub release: the `.exe`, the `.exe.blockmap` and `latest.yml`. Auto-update relies on them. `npm run release` with `GH_TOKEN` set does it in one step.
+This produces `dist/QwenTTSStudio-Setup-<version>.exe`. For a release, bump `version` in `package.json` and upload three files to a GitHub release: the `.exe`, the `.exe.blockmap` and `latest.yml`. The in-app updater relies on them. `npm run release` with `GH_TOKEN` set does it in one step.
 
 ## License
 

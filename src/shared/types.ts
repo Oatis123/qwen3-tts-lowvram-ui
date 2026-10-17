@@ -149,7 +149,7 @@ export interface BackendInfo {
 }
 
 export interface UpdaterState {
-  state: 'idle' | 'checking' | 'available' | 'downloading' | 'ready' | 'none' | 'error' | 'disabled'
+  state: 'idle' | 'checking' | 'available' | 'downloading' | 'ready' | 'installing' | 'none' | 'error' | 'disabled'
   version?: string
   percent?: number
   error?: string

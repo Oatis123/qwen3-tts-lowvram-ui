@@ -1,10 +1,10 @@
-import { Download, X } from 'lucide-react'
+import { ArrowUpCircle, Download, ExternalLink, X } from 'lucide-react'
 import { useState } from 'react'
-import { t } from '../i18n'
+import { fmt, t } from '../i18n'
 import { bytes, gib } from '../lib/format'
 import { modelName } from '../lib/models'
 import { useApp } from '../store'
-import { cx, Progress, Spinner } from './ui'
+import { Button, cx, Progress, Spinner } from './ui'
 
 function Downloads() {
   const models = useApp((s) => s.models)
@@ -120,9 +120,66 @@ function Loaded() {
   )
 }
 
+function Update() {
+  const updater = useApp((s) => s.updater)
+  const [hidden, setHidden] = useState<string | null>(null)
+  const { state, version, percent } = updater
+  const show = state === 'available' || state === 'downloading' || state === 'ready' || state === 'installing' || (state === 'error' && !!version)
+  if (!show || (hidden === version && state === 'available')) return null
+  const busy = state === 'downloading' || state === 'installing'
+  return (
+    <div className="rounded-xl border border-accent/40 bg-accent/10 p-3 text-xs">
+      <div className="flex items-start gap-2">
+        <ArrowUpCircle size={15} className="mt-0.5 shrink-0 text-accent-2" />
+        <div className="min-w-0 flex-1">
+          <div className="font-medium text-fg">{state === 'error' ? t.update.failed : t.update.available}</div>
+          <div className="text-muted">{fmt(t.update.version, { v: version ?? '' })}</div>
+        </div>
+        {state === 'available' && (
+          <button title={t.update.later} onClick={() => setHidden(version ?? null)} className="shrink-0 rounded p-0.5 text-faint hover:bg-line hover:text-fg cursor-pointer">
+            <X size={12} />
+          </button>
+        )}
+      </div>
+      {state === 'downloading' && (
+        <div className="mt-2.5">
+          <Progress value={(percent ?? 0) / 100} />
+          <div className="mt-1 flex justify-between text-[10px] text-faint">
+            <span>{t.update.downloading}</span>
+            <span className="font-mono">{Math.floor(percent ?? 0)}%</span>
+          </div>
+        </div>
+      )}
+      {state === 'installing' && (
+        <div className="mt-2.5 flex items-center gap-2 text-muted">
+          <Spinner size={12} /> {t.update.installing}
+        </div>
+      )}
+      {!busy && (
+        <>
+          <div className="mt-2 text-[10px] leading-snug text-faint">{state === 'error' ? updater.error?.split('\n')[0] : t.update.hint}</div>
+          <div className="mt-2.5 flex items-center gap-1.5">
+            <Button size="sm" variant="primary" className="h-7 flex-1 px-2 text-xs" onClick={() => void window.qts.updater.install()}>
+              {state === 'error' ? t.update.retry : t.update.install}
+            </Button>
+            <button
+              title={t.update.notes}
+              onClick={() => void window.qts.shell.openExternal(`https://github.com/Oatis123/qwen3-tts-lowvram-ui/releases/tag/v${version}`)}
+              className="flex h-7 w-7 items-center justify-center rounded-lg text-faint hover:bg-line hover:text-fg cursor-pointer"
+            >
+              <ExternalLink size={13} />
+            </button>
+          </div>
+        </>
+      )}
+    </div>
+  )
+}
+
 export function SidebarStatus() {
   return (
     <div className="flex flex-col gap-2">
+      <Update />
       <Downloads />
       <Loaded />
     </div>

@@ -132,18 +132,19 @@ export default function SettingsPage() {
       )}
 
       <Section title={t.settings.updates}>
-        <Row label={t.settings.autoUpdate} hint={updateText}>
+        <Row label={t.settings.autoUpdate} hint={t.settings.autoUpdateHint}>
           <Toggle checked={settings.autoUpdate} onChange={(v) => void patch({ autoUpdate: v })} />
         </Row>
-        <div className="flex gap-2 pt-3">
+        <div className="flex items-center gap-2 pt-3">
           <Button size="sm" icon={<RefreshCw size={14} />} disabled={updater.state === 'disabled' || updater.state === 'checking'} onClick={() => void window.qts.updater.check()}>
             {t.settings.checkNow}
           </Button>
-          {updater.state === 'ready' && (
+          {(updater.state === 'available' || updater.state === 'ready' || (updater.state === 'error' && !!updater.version)) && (
             <Button size="sm" variant="primary" onClick={() => void window.qts.updater.install()}>
               {t.settings.restartUpdate}
             </Button>
           )}
+          <span className="text-xs text-faint">{updateText}</span>
         </div>
       </Section>
 
