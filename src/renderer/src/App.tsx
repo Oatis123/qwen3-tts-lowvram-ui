@@ -1,9 +1,9 @@
 import { Activity, AlertTriangle, AudioLines, Boxes, Clock, Library, RotateCw, Settings as SettingsIcon } from 'lucide-react'
 import { useEffect, type ReactNode } from 'react'
+import { SidebarStatus } from './components/SidebarStatus'
 import { Button, cx, Spinner } from './components/ui'
 import { t } from './i18n'
 import { api } from './lib/api'
-import { gib } from './lib/format'
 import Dev from './pages/Dev'
 import Generate from './pages/Generate'
 import History from './pages/History'
@@ -27,40 +27,6 @@ function NavItem({ page, icon, label }: { page: Page; icon: ReactNode; label: st
       <span className={current === page ? 'text-accent-2' : ''}>{icon}</span>
       {label}
     </button>
-  )
-}
-
-function VramMeter() {
-  const stats = useApp((s) => s.stats)
-  const status = useApp((s) => s.status)
-  const backend = useApp((s) => s.backend.state)
-  const gpu = useApp((s) => s.gpu)
-  if (backend !== 'ready' || !stats?.cuda) return null
-  const used = stats.vram_used ?? 0
-  const total = stats.vram_total ?? 1
-  const modelLabel = status?.model_id ? status.model_id.replace('clone', t.modes.clone).replace('custom', t.modes.custom).replace('design', t.modes.design) : null
-  return (
-    <div className="rounded-xl bg-panel-2 border border-line p-3 text-xs">
-      <div className="truncate text-muted" title={stats.gpu}>{stats.gpu ?? gpu?.name}</div>
-      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-line">
-        <div className="h-full rounded-full bg-accent" style={{ width: `${(used / total) * 100}%` }} />
-      </div>
-      <div className="mt-1.5 flex justify-between text-faint">
-        <span>VRAM</span>
-        <span className="font-mono">
-          {gib(used)} / {(total / 2 ** 30).toFixed(1)}
-        </span>
-      </div>
-      <div className="mt-2 flex items-center gap-1.5 text-faint">
-        <span
-          className={cx(
-            'h-2 w-2 rounded-full',
-            status?.state === 'ready' ? 'bg-ok' : status?.state === 'loading' ? 'bg-warn animate-pulse' : status?.state === 'error' ? 'bg-bad' : 'bg-line-2'
-          )}
-        />
-        <span className="truncate">{status?.state === 'loading' ? 'загружается…' : modelLabel ?? 'модель не загружена'}</span>
-      </div>
-    </div>
   )
 }
 
@@ -170,7 +136,7 @@ export default function App() {
             {devMode && <NavItem page="dev" icon={<Activity size={18} />} label={t.nav.dev} />}
             <NavItem page="settings" icon={<SettingsIcon size={18} />} label={t.nav.settings} />
             <div className="flex-1" />
-            <VramMeter />
+            <SidebarStatus />
           </aside>
           <main className="min-w-0 flex-1 overflow-y-auto">
             {page === 'settings' ? (

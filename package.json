@@ -1,7 +1,7 @@
 {
   "name": "qwen-tts-studio",
   "productName": "Qwen TTS Studio",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Desktop app for Qwen3-TTS with low VRAM usage",
   "author": "Oatis123",
   "license": "Apache-2.0",

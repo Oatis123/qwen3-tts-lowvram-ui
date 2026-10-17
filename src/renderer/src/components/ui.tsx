@@ -254,7 +254,9 @@ export function Progress({ value, className, indeterminate }: { value?: number; 
   return (
     <div className={cx('h-1.5 w-full overflow-hidden rounded-full bg-line', className)}>
       {indeterminate ? (
-        <div className="indeterminate h-full w-1/3 rounded-full bg-accent" />
+        <div className="indeterminate">
+          <div className="rounded-full bg-accent" />
+        </div>
       ) : (
         <div className="h-full rounded-full bg-accent transition-[width] duration-300" style={{ width: `${Math.max(0, Math.min(100, (value ?? 0) * 100))}%` }} />
       )}

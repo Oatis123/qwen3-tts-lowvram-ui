@@ -115,7 +115,7 @@ def create_app(data_dir: Path, models_dir: Path, catalog: dict, token: str, on_r
 
     @app.get("/status")
     def status():
-        return {"model": engine.status(), "compat": compat.status()}
+        return {"model": engine.status(), "asr": asr.active, "compat": compat.status()}
 
     @app.get("/stats")
     def stats():
@@ -154,11 +154,16 @@ def create_app(data_dir: Path, models_dir: Path, catalog: dict, token: str, on_r
         if not (model_dir / "model.bin").exists():
             raise ModelMissing(f"whisper-{model}")
         x, sr = audio.read(await file.read())
+
+        def run():
+            asr.active = model
+            try:
+                return asr.transcribe(x, sr, model_dir, language if language not in ("", "Auto") else None, device, compute_type, beam_size, vad)
+            finally:
+                asr.active = None
+
         try:
-            return await asyncio.to_thread(
-                asr.transcribe, x, sr, model_dir, language if language not in ("", "Auto") else None,
-                device, compute_type, beam_size, vad,
-            )
+            return await asyncio.to_thread(run)
         except Exception as e:
             raise HTTPException(500, _humanize(e))
 

@@ -116,7 +116,7 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
 export const fileUrl = (path: string): string => `${base}${path}${path.includes('?') ? '&' : '?'}token=${token}`
 
 export const api = {
-  status: () => request<{ model: ModelStatus; compat: { running: boolean; host: string | null; port: number | null } }>('GET', '/status'),
+  status: () => request<{ model: ModelStatus; asr: string | null; compat: { running: boolean; host: string | null; port: number | null } }>('GET', '/status'),
   stats: () => request<Stats>('GET', '/stats'),
   loadModel: (model_id: string, load: LoadOptions) => request<ModelStatus>('POST', '/model/load', { model_id, load }),
   unloadModel: () => request<ModelStatus>('POST', '/model/unload'),

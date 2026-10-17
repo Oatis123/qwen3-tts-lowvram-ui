@@ -16,6 +16,7 @@ LANG_CODES = {v: k for k, v in LANG_MAP.items()}
 class Asr:
     def __init__(self):
         self.lock = threading.Lock()
+        self.active: str | None = None
 
     def transcribe(
         self,

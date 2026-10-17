@@ -1,7 +1,7 @@
-import { CheckCircle2, Download, FolderOpen, Trash2, X } from 'lucide-react'
+import { CheckCircle2, Download, FolderOpen, Power, PowerOff, Trash2, X } from 'lucide-react'
 import type { ReactNode } from 'react'
 import type { ModelEntryState } from '../../../shared/types'
-import { Badge, Button, Card, IconButton, PageHeader, Progress } from '../components/ui'
+import { Badge, Button, Card, IconButton, PageHeader, Progress, Spinner } from '../components/ui'
 import { t } from '../i18n'
 import { bytes } from '../lib/format'
 import { useApp } from '../store'
@@ -10,7 +10,12 @@ function ModelRow({ m, title, hint }: { m: ModelEntryState; title: ReactNode; hi
   const downloadModel = useApp((s) => s.downloadModel)
   const refreshModels = useApp((s) => s.refreshModels)
   const status = useApp((s) => s.status)
+  const whisperModel = useApp((s) => s.settings.whisperModel)
+  const backendReady = useApp((s) => s.backend.state === 'ready')
+  const loadModel = useApp((s) => s.loadModel)
+  const unloadModel = useApp((s) => s.unloadModel)
   const loaded = status?.model_id === m.key
+  const required = m.key === `whisper-${whisperModel}`
 
   const remove = async (): Promise<void> => {
     if (!confirm(t.models.deleteConfirm)) return
@@ -24,7 +29,8 @@ function ModelRow({ m, title, hint }: { m: ModelEntryState; title: ReactNode; hi
         <div className="flex items-center gap-2">
           <span className="font-medium">{title}</span>
           {m.downloaded && <CheckCircle2 size={15} className="text-ok" />}
-          {loaded && <Badge tone="accent">в памяти</Badge>}
+          {loaded && <Badge tone="accent">{t.models.loaded}</Badge>}
+          {required && <Badge>{t.models.required}</Badge>}
         </div>
         <div className="mt-0.5 text-xs text-faint">
           {m.repo} · {bytes(m.bytes)}
@@ -46,9 +52,25 @@ function ModelRow({ m, title, hint }: { m: ModelEntryState; title: ReactNode; hi
           <X size={16} />
         </IconButton>
       ) : m.downloaded ? (
-        <IconButton title={t.common.delete} disabled={loaded} onClick={() => void remove()}>
-          <Trash2 size={16} />
-        </IconButton>
+        <div className="flex items-center gap-1">
+          {!m.key.startsWith('whisper-') && backendReady &&
+            (loaded && status?.state === 'ready' ? (
+              <Button size="sm" variant="ghost" icon={<PowerOff size={14} />} disabled={status.busy} onClick={() => void unloadModel()}>
+                {t.modelBar.unload}
+              </Button>
+            ) : loaded && status?.state === 'loading' ? (
+              <span className="flex items-center gap-2 px-3 text-xs text-faint">
+                <Spinner size={14} /> {t.sidebar.loading}
+              </span>
+            ) : (
+              <Button size="sm" icon={<Power size={14} />} disabled={status?.state === 'loading' || !!status?.busy} onClick={() => void loadModel(m.key)}>
+                {t.modelBar.load}
+              </Button>
+            ))}
+          <IconButton title={required ? t.models.requiredHint : t.common.delete} disabled={loaded || required} onClick={() => void remove()}>
+            <Trash2 size={16} />
+          </IconButton>
+        </div>
       ) : (
         <Button size="sm" icon={<Download size={14} />} onClick={() => void downloadModel(m.key)}>
           {t.common.download}

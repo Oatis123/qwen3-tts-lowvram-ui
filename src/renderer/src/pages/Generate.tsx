@@ -2,12 +2,13 @@ import { Dices, Download, FileAudio, Lock, Mic2, Shuffle, Sparkles, Square, User
 import { useEffect, useState } from 'react'
 import type { Mode, Size } from '../../../shared/types'
 import { AddVoiceWizard } from '../components/AddVoiceWizard'
+import { ModelBar } from '../components/ModelBar'
 import { ParamsPanel } from '../components/ParamsPanel'
 import { PlayerView } from '../components/PlayerView'
 import { Badge, Button, Card, cx, IconButton, Input, Label, Modal, Progress, Segmented, Select, Slider, Spinner, Textarea } from '../components/ui'
 import { VoiceSelect } from '../components/VoiceSelect'
 import { fmt, t } from '../i18n'
-import { api, ApiError } from '../lib/api'
+import { api } from '../lib/api'
 import { bytes, estimateSeconds } from '../lib/format'
 import { modelKey, player, useApp, useGen } from '../store'
 
@@ -162,22 +163,6 @@ export default function Generate() {
     if (mode === 'clone' && settings.voiceId && voices.length && !voices.some((v) => v.id === settings.voiceId)) void patch({ voiceId: voices[0].id })
   }, [mode, voices, settings.voiceId, patch])
 
-  useEffect(() => {
-    if (!modelEntry?.downloaded || busy) return
-    if (status?.state === 'loading' || (status?.model_id === key && status.state === 'ready')) return
-    const timer = setTimeout(() => {
-      api.loadModel(key, dev ? settings.load : { max_seq_len: 1024, offload_embedding: true, repack: true, attn: 'sdpa' }).then(
-        () => void useApp.getState().refreshStatus(),
-        (e) => {
-          if (!(e instanceof ApiError && e.code === 'busy')) void useApp.getState().refreshStatus()
-        }
-      )
-      setTimeout(() => void useApp.getState().refreshStatus(), 300)
-    }, 700)
-    return () => clearTimeout(timer)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key, modelEntry?.downloaded])
-
   const canGenerate =
     !!gen.draft.text.trim() &&
     !busy &&
@@ -250,7 +235,7 @@ export default function Generate() {
         </div>
 
         <div className="space-y-4">
-          {modelEntry && !modelEntry.downloaded && <MissingModel modelId={key} />}
+          {modelEntry && !modelEntry.downloaded ? <MissingModel modelId={key} /> : <ModelBar modelKey={key} busy={busy} />}
           {gen.missingModel && gen.missingModel !== key && <MissingModel modelId={gen.missingModel} />}
 
           <Card className="p-5">

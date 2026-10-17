@@ -86,6 +86,7 @@ class Engine:
         self.lock = threading.Lock()
         self.model = None
         self.model_id: str | None = None
+        self.pending_id: str | None = None
         self.load_opts: LoadOptions | None = None
         self.state = "idle"
         self.error: str | None = None
@@ -102,7 +103,7 @@ class Engine:
     def status(self) -> dict:
         return {
             "state": self.state,
-            "model_id": self.model_id,
+            "model_id": self.model_id or (self.pending_id if self.state in ("loading", "error") else None),
             "error": self.error,
             "busy": self.busy,
             "load": asdict(self.load_opts) if self.load_opts else None,
@@ -136,6 +137,9 @@ class Engine:
     def unload(self) -> None:
         with self.lock:
             self._unload()
+            self.state = "idle"
+            self.pending_id = None
+            self.error = None
 
     def _ensure(self, model_id: str, opts: LoadOptions) -> None:
         if self.model is not None and self.model_id == model_id and self.load_opts == opts:
@@ -144,6 +148,7 @@ class Engine:
         if not (path / "config.json").exists():
             raise ModelMissing(model_id)
         self._unload()
+        self.pending_id = model_id
         self.state = "loading"
         self.error = None
         failure: str | None = None

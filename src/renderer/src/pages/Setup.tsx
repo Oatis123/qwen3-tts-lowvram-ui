@@ -1,8 +1,8 @@
-import { AlertTriangle, Check, CheckCircle2, Cpu, Download, ExternalLink, Gauge, Package, Sparkles, X } from 'lucide-react'
+import { AlertTriangle, Check, CheckCircle2, Cpu, Download, ExternalLink, Package, X } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import type { RuntimeProgress } from '../../../shared/types'
 import { Button, Card, cx, Progress, Spinner } from '../components/ui'
-import { fmt, t } from '../i18n'
+import { t } from '../i18n'
 import { bytes } from '../lib/format'
 import { useApp } from '../store'
 
@@ -215,114 +215,68 @@ function RuntimeStep({ onNext }: { onNext: () => void }) {
   )
 }
 
-function ModelStep() {
+function WhisperStep() {
   const models = useApp((s) => s.models)
-  const gpu = useApp((s) => s.gpu)
+  const whisperModel = useApp((s) => s.settings.whisperModel)
   const downloadModel = useApp((s) => s.downloadModel)
   const finishSetup = useApp((s) => s.finishSetup)
-  const patch = useApp((s) => s.patch)
-  const [pick, setPick] = useState<Record<string, boolean>>({ 'clone-0.6B': true, 'clone-1.7B': false, 'whisper-large-v3-turbo': true })
   const [finishing, setFinishing] = useState(false)
-  const vram = (gpu?.vramMb ?? 0) / 1024
+  const key = `whisper-${whisperModel}`
+  const m = models.find((x) => x.key === key)
 
-  const byKey = (k: string) => models.find((m) => m.key === k)
-  const chosen = Object.entries(pick).filter(([, v]) => v).map(([k]) => k)
-  const anyDownloading = chosen.some((k) => byKey(k)?.downloading)
-  const ttsReady = models.some((m) => !m.key.startsWith('whisper-') && m.downloaded)
-  const allChosenDone = chosen.length > 0 && chosen.every((k) => byKey(k)?.downloaded)
-
-  const options = [
-    { key: 'clone-0.6B', title: t.setup.fast, text: t.setup.fastText, need: 2, icon: <Gauge size={20} /> },
-    { key: 'clone-1.7B', title: t.setup.quality, text: t.setup.qualityText, need: 5, icon: <Sparkles size={20} /> }
-  ]
+  useEffect(() => {
+    if (m && !m.downloaded && !m.downloading && !m.error) void downloadModel(key)
+  }, [m, key, downloadModel])
 
   const start = async (): Promise<void> => {
     setFinishing(true)
-    const size = byKey('clone-0.6B')?.downloaded ? '0.6B' : '1.7B'
-    await patch({ size })
     await finishSetup()
-  }
-
-  const ModelCard = ({ k, children }: { k: string; children: React.ReactNode }) => {
-    const m = byKey(k)
-    const checked = !!pick[k]
-    return (
-      <button
-        onClick={() => !m?.downloading && setPick({ ...pick, [k]: !checked })}
-        className={cx('w-full rounded-2xl border p-5 text-left transition-colors cursor-pointer', checked ? 'border-accent bg-accent/10' : 'border-line bg-panel hover:border-line-2')}
-      >
-        <div className="flex items-start gap-4">
-          <div className={cx('mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md border', checked ? 'border-accent bg-accent text-white' : 'border-line-2')}>
-            {checked && <Check size={14} />}
-          </div>
-          <div className="min-w-0 flex-1">
-            {children}
-            {m && (
-              <div className="mt-3">
-                {m.downloaded ? (
-                  <span className="inline-flex items-center gap-1 text-xs text-ok">
-                    <CheckCircle2 size={14} /> {t.common.downloaded}
-                  </span>
-                ) : m.downloading ? (
-                  <div>
-                    <Progress value={(m.received ?? 0) / Math.max(1, m.total ?? m.bytes)} />
-                    <div className="mt-1 text-xs text-faint font-mono">
-                      {bytes(m.received)} / {bytes(m.total || m.bytes)} · {bytes(m.speed)}/с
-                    </div>
-                  </div>
-                ) : (
-                  <span className="text-xs text-faint">
-                    {bytes(m.bytes)} {m.error ? `· ${m.error}` : ''}
-                  </span>
-                )}
-              </div>
-            )}
-          </div>
-        </div>
-      </button>
-    )
   }
 
   return (
     <div>
-      <h2 className="text-2xl font-semibold">{t.setup.modelTitle}</h2>
-      <p className="mt-2 text-muted">{t.setup.modelText}</p>
-      <div className="mt-6 grid grid-cols-2 gap-3">
-        {options.map((o) => (
-          <ModelCard key={o.key} k={o.key}>
-            <div className="flex items-center gap-2 font-semibold">
-              <span className="text-accent-2">{o.icon}</span>
-              {o.title}
-              <span className="text-xs font-normal text-faint">{o.key.split('-')[1]}</span>
+      <h2 className="text-2xl font-semibold">{t.setup.whisperTitle}</h2>
+      <p className="mt-2 text-muted">{t.setup.whisperText}</p>
+      {m && (
+        <Card className="mt-6 p-5">
+          <div className="flex items-start gap-4">
+            <div className={cx('flex h-11 w-11 shrink-0 items-center justify-center rounded-xl', m.downloaded ? 'bg-ok/15 text-ok' : 'bg-accent/15 text-accent-2')}>
+              {m.downloaded ? <CheckCircle2 size={22} /> : <Download size={22} />}
             </div>
-            <div className="mt-1 text-[13px] text-muted">{o.text}</div>
-            <div className={cx('mt-2 text-xs', vram && vram < o.need ? 'text-warn' : 'text-faint')}>
-              {fmt(t.setup.needVram, { n: o.need })}
-              {vram ? ` · ${fmt(t.setup.youHave, { n: vram.toFixed(0) })}` : ''}
+            <div className="min-w-0 flex-1">
+              <div className="font-semibold">Whisper {whisperModel}</div>
+              <div className="text-[13px] text-muted mt-0.5">{m.repo} · {bytes(m.bytes)}</div>
+              <div className="mt-3">
+                {m.downloaded ? (
+                  <span className="text-[13px] text-ok">{t.common.downloaded}</span>
+                ) : m.downloading ? (
+                  <>
+                    <Progress value={(m.received ?? 0) / Math.max(1, m.total || m.bytes)} />
+                    <div className="mt-1.5 flex justify-between font-mono text-xs text-faint">
+                      <span>
+                        {bytes(m.received)} / {bytes(m.total || m.bytes)}
+                      </span>
+                      <span>{m.speed ? `${bytes(m.speed)}/с` : ''}</span>
+                    </div>
+                  </>
+                ) : m.error ? (
+                  <div className="flex items-center gap-3">
+                    <span className="text-[13px] text-bad">{m.error}</span>
+                    <Button size="sm" onClick={() => void downloadModel(key)}>
+                      {t.common.retry}
+                    </Button>
+                  </div>
+                ) : (
+                  <Progress indeterminate />
+                )}
+              </div>
             </div>
-          </ModelCard>
-        ))}
-      </div>
-      <div className="mt-3">
-        <ModelCard k="whisper-large-v3-turbo">
-          <div className="font-semibold">{t.setup.whisper}</div>
-          <div className="mt-1 text-[13px] text-muted">{t.setup.whisperText}</div>
-        </ModelCard>
-      </div>
-      <div className="mt-6 flex gap-2">
-        {!allChosenDone && (
-          <Button
-            variant="primary"
-            size="lg"
-            icon={<Download size={18} />}
-            disabled={!chosen.length || anyDownloading || !chosen.some((k) => k.startsWith('clone') || ttsReady)}
-            loading={anyDownloading}
-            onClick={() => chosen.forEach((k) => !byKey(k)?.downloaded && void downloadModel(k))}
-          >
-            {t.setup.downloadSelected}
-          </Button>
-        )}
-        <Button variant={allChosenDone ? 'primary' : 'secondary'} size="lg" disabled={!ttsReady || finishing || anyDownloading} loading={finishing} onClick={() => void start()}>
+          </div>
+        </Card>
+      )}
+      <p className="mt-4 text-[13px] text-faint">{t.setup.ttsLater}</p>
+      <div className="mt-6">
+        <Button variant="primary" size="lg" disabled={!m?.downloaded || finishing} loading={finishing} onClick={() => void start()}>
           {t.setup.start}
         </Button>
       </div>
@@ -333,12 +287,13 @@ function ModelStep() {
 export default function Setup() {
   const runtime = useApp((s) => s.runtime)
   const models = useApp((s) => s.models)
+  const whisperModel = useApp((s) => s.settings.whisperModel)
   const finishSetup = useApp((s) => s.finishSetup)
-  const hasTts = models.some((m) => !m.key.startsWith('whisper-') && m.downloaded)
+  const whisperReady = !!models.find((m) => m.key === `whisper-${whisperModel}`)?.downloaded
   const [step, setStep] = useState<Step>(runtime?.upToDate ? 'model' : runtime?.installed ? 'runtime' : 'gpu')
 
   const afterRuntime = (): void => {
-    if (hasTts) void finishSetup()
+    if (whisperReady) void finishSetup()
     else setStep('model')
   }
 
@@ -347,7 +302,7 @@ export default function Setup() {
       <Steps step={step} />
       {step === 'gpu' && <GpuStep onNext={() => setStep('runtime')} />}
       {step === 'runtime' && <RuntimeStep onNext={afterRuntime} />}
-      {step === 'model' && <ModelStep />}
+      {step === 'model' && <WhisperStep />}
     </div>
   )
 }

@@ -21,7 +21,7 @@ A Windows app with a simple UI and a real installer, using about half the usual 
 - **Voice library.** Add a voice once and pick it from a list afterwards. Voices can be exported to a file and shared.
 - **Built-in voices.** 9 Qwen3-TTS speakers. Describe the delivery in words: "happily", "whisper", "like a news anchor".
 - **Voice design.** Create a voice from a text description ("a deep, raspy male voice, speaks slowly"). Save the ones you like to the library.
-- **Pick a model:** 0.6B (fast, ~2 GB of VRAM is enough) or 1.7B (better quality). Switch with one click.
+- **Pick a model:** 0.6B (fast, ~2 GB of VRAM is enough) or 1.7B (better quality). Download only the ones you need, and load or unload them from VRAM with a button. The sidebar shows what's in memory and what's downloading.
 - **Streaming playback.** Audio starts in about 0.4 s. Long texts are split and voiced in parts, with no length limit.
 - **Export to WAV and MP3**, plus a history of every generation that can be replayed with the same settings.
 - **Developer mode:** every generation and lowvram parameter, presets, a live VRAM chart, engine logs and a local HTTP API.
@@ -50,7 +50,7 @@ A Windows app with a simple UI and a real installer, using about half the usual 
 1. Download `QwenTTSStudio-Setup-*.exe` from the [releases page](https://github.com/Oatis123/qwen3-tts-lowvram-ui/releases/latest).
 2. Run it and choose an install folder, ideally on a drive with plenty of free space.
    Windows may warn about an "unknown publisher" because the installer isn't code-signed. Click "More info" → "Run anyway".
-3. On first launch a setup wizard checks your GPU and downloads the components (~3 GB) and the model you choose.
+3. On first launch a setup wizard checks your GPU and downloads the components (~3 GB) and the Whisper speech recognition model (1.6 GB). Text-to-speech models are downloaded later, from the Models page or right on the main screen.
 
 The app updates itself. Updates don't re-download components or models.
 
@@ -88,7 +88,7 @@ Electron (main)  ── IPC ──  React UI (renderer)
                  └─ qts/compat.py   local API (/play, /synthesize, /synthesize_stream…)
 ```
 
-The installer is about 115 MB. Python, torch and the models are downloaded on first run. Python dependencies are pinned in `backend/requirements.lock`. When a new app version changes it, the wizard offers to update the components and only the differences are downloaded.
+The installer is about 115 MB. Python, torch and Whisper are downloaded on first run, and text-to-speech models when you choose them. Python dependencies are pinned in `backend/requirements.lock`. When a new app version changes it, the wizard offers to update the components and only the differences are downloaded.
 
 ### Local API
 

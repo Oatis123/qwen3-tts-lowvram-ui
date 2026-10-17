@@ -12,8 +12,9 @@ import type {
   Size,
   UpdaterState
 } from '../../shared/types'
-import { api, configure, generate, type GenHandle, type GenRequest, type GenStats, type HistoryItem, type ModelStatus, type Stats, type Voice } from './lib/api'
+import { api, ApiError, configure, generate, type GenHandle, type GenRequest, type GenStats, type HistoryItem, type ModelStatus, type Stats, type Voice } from './lib/api'
 import { WavePlayer } from './lib/player'
+import { t } from './i18n'
 
 export type Page = 'generate' | 'voices' | 'history' | 'models' | 'settings' | 'dev'
 
@@ -35,6 +36,7 @@ interface AppState {
   models: ModelEntryState[]
   voices: Voice[]
   status: ModelStatus | null
+  asr: string | null
   stats: Stats | null
   updater: UpdaterState
   page: Page
@@ -50,6 +52,8 @@ interface AppState {
   refreshStatus(): Promise<void>
   startBackend(): Promise<void>
   downloadModel(key: string): Promise<void>
+  loadModel(key: string): Promise<void>
+  unloadModel(): Promise<void>
 }
 
 const emptyCatalog: Catalog = { tts: [], whisper: [], speakers: [], languages: [] }
@@ -69,6 +73,7 @@ export const useApp = create<AppState>((set, get) => ({
   models: [],
   voices: [],
   status: null,
+  asr: null,
   stats: null,
   updater: { state: 'idle' },
   page: 'generate',
@@ -86,8 +91,8 @@ export const useApp = create<AppState>((set, get) => ({
       q.backend.info(),
       q.updater.state()
     ])
-    const hasTts = models.some((m) => !m.key.startsWith('whisper-') && m.downloaded)
-    set({ settings, catalog, info, runtime, models, backend, updater, needsSetup: !runtime.upToDate || !hasTts, booted: true })
+    const whisperReady = !!models.find((m) => m.key === `whisper-${settings.whisperModel}`)?.downloaded
+    set({ settings, catalog, info, runtime, models, backend, updater, needsSetup: !runtime.upToDate || !whisperReady, booted: true })
 
     q.backend.onState((b) => {
       set({ backend: b })
@@ -169,9 +174,32 @@ export const useApp = create<AppState>((set, get) => ({
   async refreshStatus() {
     try {
       const s = await api.status()
-      set({ status: s.model })
+      set({ status: s.model, asr: s.asr })
     } catch {
       /* backend not ready */
+    }
+  },
+
+  async loadModel(key) {
+    const { settings, status } = get()
+    set({ status: { state: 'loading', model_id: key, error: null, busy: false, load: status?.load ?? null } })
+    try {
+      await api.loadModel(key, settings.devMode ? settings.load : { ...DEFAULT_LOAD })
+    } catch (e) {
+      if (!(e instanceof ApiError && e.code === 'busy')) get().toast((e as Error).message, 'error')
+    } finally {
+      await get().refreshStatus()
+    }
+  },
+
+  async unloadModel() {
+    try {
+      await api.unloadModel()
+      get().toast(t.sidebar.unloaded, 'ok')
+    } catch (e) {
+      get().toast((e as Error).message, 'error')
+    } finally {
+      await get().refreshStatus()
     }
   },
 

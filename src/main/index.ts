@@ -95,6 +95,7 @@ function registerIpc(): void {
   })
   ipcMain.handle('models:cancel', (_e, key: string) => cancelDownload(key))
   ipcMain.handle('models:remove', (_e, key: string) => {
+    if (key === `whisper-${getSettings().whisperModel}`) throw new Error('required model')
     const entry = entries(catalog()).find((m) => m.key === key)
     if (entry) removeModel(entry.repo)
   })
