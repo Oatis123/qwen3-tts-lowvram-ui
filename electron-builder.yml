@@ -1,0 +1,38 @@
+appId: com.oatis123.qwenttsstudio
+productName: Qwen TTS Studio
+directories:
+  buildResources: build
+  output: dist
+files:
+  - out/**/*
+  - package.json
+  - build/icon.png
+extraResources:
+  - from: backend
+    to: backend
+    filter:
+      - "**/*"
+      - "!**/__pycache__/**"
+  - from: resources/bin
+    to: bin
+    filter:
+      - uv.exe
+win:
+  target:
+    - target: nsis
+      arch: x64
+  icon: build/icon.png
+  artifactName: QwenTTSStudio-Setup-${version}.${ext}
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: always
+  createStartMenuShortcut: true
+  shortcutName: Qwen TTS Studio
+  deleteAppDataOnUninstall: false
+  include: build/installer.nsh
+publish:
+  provider: github
+  owner: Oatis123
+  repo: qwen3-tts-lowvram-ui

@@ -1,0 +1,28 @@
+{
+  "tts": [
+    { "id": "clone-0.6B", "mode": "clone", "size": "0.6B", "repo": "Qwen/Qwen3-TTS-12Hz-0.6B-Base", "bytes": 2520000000, "vramCap": 2.5 },
+    { "id": "clone-1.7B", "mode": "clone", "size": "1.7B", "repo": "Qwen/Qwen3-TTS-12Hz-1.7B-Base", "bytes": 4540000000, "vramCap": null },
+    { "id": "custom-0.6B", "mode": "custom", "size": "0.6B", "repo": "Qwen/Qwen3-TTS-12Hz-0.6B-CustomVoice", "bytes": 2500000000, "vramCap": 2.5 },
+    { "id": "custom-1.7B", "mode": "custom", "size": "1.7B", "repo": "Qwen/Qwen3-TTS-12Hz-1.7B-CustomVoice", "bytes": 4520000000, "vramCap": null },
+    { "id": "design-1.7B", "mode": "design", "size": "1.7B", "repo": "Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign", "bytes": 4520000000, "vramCap": null }
+  ],
+  "whisper": [
+    { "id": "large-v3-turbo", "repo": "mobiuslabsgmbh/faster-whisper-large-v3-turbo", "bytes": 1620000000 },
+    { "id": "large-v3", "repo": "Systran/faster-whisper-large-v3", "bytes": 3090000000 },
+    { "id": "medium", "repo": "Systran/faster-whisper-medium", "bytes": 1530000000 },
+    { "id": "small", "repo": "Systran/faster-whisper-small", "bytes": 484000000 },
+    { "id": "base", "repo": "Systran/faster-whisper-base", "bytes": 145000000 }
+  ],
+  "speakers": [
+    { "id": "vivian", "name": "Vivian", "native": "Chinese", "gender": "f" },
+    { "id": "serena", "name": "Serena", "native": "Chinese", "gender": "f" },
+    { "id": "uncle_fu", "name": "Uncle Fu", "native": "Chinese", "gender": "m" },
+    { "id": "dylan", "name": "Dylan", "native": "Chinese", "gender": "m" },
+    { "id": "eric", "name": "Eric", "native": "Chinese", "gender": "m" },
+    { "id": "ryan", "name": "Ryan", "native": "English", "gender": "m" },
+    { "id": "aiden", "name": "Aiden", "native": "English", "gender": "m" },
+    { "id": "ono_anna", "name": "Ono Anna", "native": "Japanese", "gender": "f" },
+    { "id": "sohee", "name": "Sohee", "native": "Korean", "gender": "f" }
+  ],
+  "languages": ["Auto", "Russian", "English", "Chinese", "Japanese", "Korean", "German", "French", "Spanish", "Italian", "Portuguese"]
+}

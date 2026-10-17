@@ -1,0 +1,14 @@
+torch==2.11.0
+torchaudio==2.11.0
+faster-qwen3-tts==0.4.0
+transformers==5.16.1
+qwen3-tts-lowvram @ https://github.com/Oatis123/qwen3-tts-lowvram/archive/636d5f55afa090a65cfca1e052129558693a2360.zip
+faster-whisper==1.2.1
+ctranslate2==4.8.3
+fastapi
+uvicorn
+websockets
+python-multipart
+sounddevice
+soundfile
+numpy
